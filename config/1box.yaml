@@ -1,0 +1,6 @@
+mp:
+  mp-key: 'key123'
+  mp-token: 'tokenABC'
+db:
+  db-user: 'spiderman'
+  db-pass: 'save_the_world'
