@@ -4,8 +4,8 @@ import "time"
 
 type MPQuery struct {
 	Event            string    `json:"event"`
-	ProjectId        string    `json:"distinct_id"`
-	QueryId          string    `json:"query_id"`
+	ProjectID        string    `json:"distinct_id"`
+	QueryID          string    `json:"query_id"`
 	QueryMs          int64     `json:"dqs_elapsed_ms"`
 	TotalWorkerCPUMs int64     `json:"lqs_total_cpu_ms"`
 	Result           bool      `json:"success"`
@@ -22,7 +22,7 @@ type MPQuery struct {
 	PropertiesMethod string    `json:"properties_query_method"` // properties
 	RetentionType    string    `json:"retention_type"`          // retention
 
-	Time uint64 `json:"time"`
+	Time int64 `json:"time"`
 }
 
 func NewMPQuery(q *Query) *MPQuery {
@@ -32,15 +32,15 @@ func NewMPQuery(q *Query) *MPQuery {
 
 	mq := &MPQuery{
 		Event:            q.Event,
-		ProjectId:        q.Properties.ProjectId,
-		QueryId:          q.Properties.QueryId,
+		ProjectID:        q.Properties.ProjectID,
+		QueryID:          q.Properties.QueryID,
 		QueryMs:          q.Properties.ElapsedMs,
 		TotalWorkerCPUMs: q.Properties.TotalWorkerCPUMs,
 		Result:           q.Properties.Result,
 		Time:             q.Properties.Time,
 		Source:           q.Properties.Source,
 		Unit:             q.Properties.Unit,
-		SSQMs:            q.Properties.Subquery.ElapsedMs,
+		SSQMs:            q.Properties.Subquery.RespSentAt - q.Properties.Subquery.ReqRecvAt,
 		SSQHostname:      q.Properties.Subquery.Hostname,
 		FromDate:         q.Properties.RequestParams.FromDate,
 		ToDate:           q.Properties.RequestParams.ToDate,

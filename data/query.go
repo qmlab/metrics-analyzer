@@ -9,21 +9,21 @@ import (
 // query is the data model for query metrics
 
 type Properties struct {
-	ProjectId        string `json:"distinct_id"`
-	QueryId          string `json:"query_id"`
-	ElapsedMs        int64  `json:"dqs_elapsed_ms"`
+	ElapsedMs     int64  `json:"dqs_elapsed_ms"`
+	ProjectID     string `json:"distinct_id"`
+	QueryID       string `json:"query_id"`
+	Result        bool   `json:"success"`
+	RequestParams RequestParams
+	Source        string `json:"source"`
+	Subquery      struct {
+		RespSentAt int64  `json:"lqs_resp_sent_at"`
+		ReqRecvAt  int64  `json:"lqs_req_received_at"`
+		ElapsedMs  int64  `json:"lqs_elapsed_ms"`
+		Hostname   string `json:"lqs_hostname"`
+	} `json:"slowest_subquery"`
+	Time             int64  `json:"time"`
 	TotalWorkerCPUMs int64  `json:"lqs_total_cpu_ms"`
-	Result           bool   `json:"success"`
-	Time             uint64 `json:"time"`
-	Source           string `json:"source"`
 	Unit             string `json:"unit"`
-	Subquery         Subquery
-	RequestParams    RequestParams
-}
-
-type Subquery struct {
-	ElapsedMs int64  `json:"lqs_elapsed_ms"`
-	Hostname  string `json:"lqs_hostname"`
 }
 
 type RequestParams struct {
