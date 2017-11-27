@@ -3,18 +3,17 @@ package data
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 )
 
 // query is the data model for query metrics
 
 type Properties struct {
-	ElapsedMs     int64  `json:"dqs_elapsed_ms"`
-	ProjectID     string `json:"distinct_id"`
-	QueryID       string `json:"query_id"`
-	Result        bool   `json:"success"`
-	RequestParams RequestParams
-	Source        string `json:"source"`
+	ElapsedMs     int64         `json:"dqs_elapsed_ms"`
+	ProjectID     string        `json:"distinct_id"`
+	QueryID       string        `json:"query_id"`
+	Result        bool          `json:"success"`
+	RequestParams RequestParams `json:"request_params"`
+	Source        string        `json:"source"`
 	Subquery      struct {
 		RespSentAt int64  `json:"lqs_resp_sent_at"`
 		ReqRecvAt  int64  `json:"lqs_req_received_at"`
@@ -27,9 +26,9 @@ type Properties struct {
 }
 
 type RequestParams struct {
-	FromDate  time.Time `json:"from_date"`
-	ToDate    time.Time `json:"to_date"`
-	QueryPool string    `json:"query_pool"`
+	FromDate  string `json:"from_date"`
+	ToDate    string `json:"to_date"`
+	QueryPool string `json:"query_pool"`
 
 	Selector         string `json:"selector"`                // list
 	Queries          string `json:"queries"`                 // normal, funnel, history, retention, addiction

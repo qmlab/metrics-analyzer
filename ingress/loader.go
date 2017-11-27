@@ -6,21 +6,22 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 
 	"../config"
+	"../data"
 	client "github.com/influxdata/influxdb/client/v2"
 )
 
 // Loader is for loading cached files, generate fake points and insert to store
 
 type Loader struct {
-	file   string
 	config *config.Config
 	client client.Client
 	logger *log.Logger
 }
 
-func NewLoader(file string, config *config.Config, logger *log.Logger) (*Loader, error) {
+func NewLoader(config *config.Config, logger *log.Logger) (*Loader, error) {
 	if config == nil {
 		return nil, fmt.Errorf("[Loader]No config")
 	}
@@ -36,7 +37,6 @@ func NewLoader(file string, config *config.Config, logger *log.Logger) (*Loader,
 	}
 
 	l := &Loader{
-		file:   file,
 		config: config,
 		client: httpClient,
 		logger: logger,
@@ -45,8 +45,8 @@ func NewLoader(file string, config *config.Config, logger *log.Logger) (*Loader,
 	return l, nil
 }
 
-func (l *Loader) LoadData() error {
-	f, err := os.Open(l.file)
+func (l *Loader) InsertData(file, db string) error {
+	f, err := os.Open(file)
 	if err != nil {
 		return err
 	}
@@ -54,27 +54,39 @@ func (l *Loader) LoadData() error {
 	defer f.Close()
 
 	reader := bufio.NewReader(f)
-	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  l.config.DB.Address,
+	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  db,
 		Precision: "s",
 	})
+
 	for {
-		line, err := reader.ReadBytes('\n')
-		if err == io.EOF {
+		line, erl := reader.ReadBytes('\n')
+		if erl == io.EOF {
 			break
 		}
 		if len(line) == 0 {
 			continue
 		}
 
-		point, err := parse(line)
+		pt, erp := parse(line)
+		bp.AddPoint(pt)
 
-		if err != nil {
+		if erp != nil {
+			//debugging
+			println(erp.Error())
 			continue
 		}
 	}
 
-	return nil
+	// Write the batch
+	err = l.client.Write(bp)
+
+	return err
+}
+
+func (l *Loader) ExecuteQuery(cmd, db, precision string) (*client.Response, error) {
+	q := client.NewQuery(cmd, db, precision)
+	return l.client.Query(q)
 }
 
 func parse(line []byte) (*client.Point, error) {
@@ -82,4 +94,40 @@ func parse(line []byte) (*client.Point, error) {
 		return nil, fmt.Errorf("[Loader]Empty line to parse")
 	}
 
+	q, err := data.NewQuery(line)
+	if err != nil {
+		return nil, err
+	}
+
+	mp, _ := data.NewMPQuery(q)
+	tags := map[string]string{
+		"Event":            mp.Event,
+		"ProjectID":        mp.ProjectID,
+		"QueryID":          mp.QueryID,
+		"Source":           mp.Source,
+		"Unit":             mp.Unit,
+		"SSQHostname":      mp.SSQHostname,
+		"QueryPool":        mp.QueryPool,
+		"Selector":         mp.Selector,
+		"Queries":          mp.Queries,
+		"Script":           mp.Script,
+		"PropertiesMethod": mp.PropertiesMethod,
+		"RetentionType":    mp.RetentionType,
+	}
+
+	fields := map[string]interface{}{
+		"QueryMs":          mp.QueryMs,
+		"TotalWorkerCPUMs": mp.TotalWorkerCPUMs,
+		"Result":           mp.Result,
+		"SSQMs":            mp.SSQMs,
+		"FromDate":         mp.FromDate,
+		"ToDate":           mp.ToDate,
+	}
+
+	pt, err := client.NewPoint("mp_query", tags, fields, time.Unix(mp.Time, 0))
+	if err != nil {
+		return nil, err
+	}
+
+	return pt, nil
 }
