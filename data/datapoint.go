@@ -1,7 +1,10 @@
 package data
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -24,6 +27,7 @@ type MPQuery struct {
 	Script           string `json:"script"`                  // jql
 	PropertiesMethod string `json:"properties_query_method"` // properties
 	RetentionType    string `json:"retention_type"`          // retention
+	Signature        string `json:"signature"`               // signature of MP query tags
 
 	Time int64 `json:"time"`
 }
@@ -62,7 +66,29 @@ func NewMPQuery(q *Query) (*MPQuery, error) {
 		Script:           q.Properties.RequestParams.Script,
 		PropertiesMethod: q.Properties.RequestParams.PropertiesMethod,
 		RetentionType:    q.Properties.RequestParams.RetentionType,
+		Signature:        GetSignature(q),
 	}
 
 	return mq, nil
+}
+
+func GetSignature(q *Query) string {
+	text := strings.Join([]string{
+		q.Event,
+		q.Properties.ProjectID,
+		q.Properties.Unit,
+		q.Properties.RequestParams.FromDate,
+		q.Properties.RequestParams.ToDate,
+		q.Properties.RequestParams.QueryPool,
+		q.Properties.RequestParams.Selector,
+		q.Properties.RequestParams.Queries,
+		q.Properties.RequestParams.Script,
+		q.Properties.RequestParams.PropertiesMethod,
+		q.Properties.RequestParams.RetentionType,
+	}, "|")
+
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+
+	return hex.EncodeToString(hasher.Sum(nil))
 }

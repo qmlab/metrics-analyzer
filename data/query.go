@@ -51,15 +51,3 @@ func NewQuery(data []byte) (*Query, error) {
 	err := json.Unmarshal(data, q)
 	return q, err
 }
-
-// GetQuerySignature - returns the hash value of the query signature based on key properties and query params
-func (p *Properties) GetQuerySignature() (int64, error) {
-	//TODO
-	return 0, nil
-}
-
-// GenerateFakeClone - clone a query with randomly generated measurements but same signature
-func (p *Query) GenerateFakeClone() (*Query, error) {
-	//TODO
-	return nil, nil
-}

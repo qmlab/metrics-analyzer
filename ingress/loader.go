@@ -113,6 +113,7 @@ func parse(line []byte) (*client.Point, error) {
 		"Script":           mp.Script,
 		"PropertiesMethod": mp.PropertiesMethod,
 		"RetentionType":    mp.RetentionType,
+		"Signature":        mp.Signature,
 	}
 
 	fields := map[string]interface{}{

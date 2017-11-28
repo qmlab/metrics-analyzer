@@ -1,7 +1,8 @@
 package data
 
 import (
-	"io/ioutil"
+	"bufio"
+	"os"
 	"testing"
 	"time"
 
@@ -11,8 +12,13 @@ import (
 const testFile = "./testdata/query_output.txt"
 
 func TestDeserializeQuery(t *testing.T) {
-	data, err := ioutil.ReadFile(testFile)
+	f, err := os.Open(testFile)
 	assert.Nil(t, err)
+	defer f.Close()
+
+	reader := bufio.NewReader(f)
+	data, erl := reader.ReadBytes('\n')
+	assert.Nil(t, erl)
 
 	q, err := NewQuery(data)
 	assert.Nil(t, err)
@@ -23,8 +29,13 @@ func TestDeserializeQuery(t *testing.T) {
 }
 
 func TestCreateDatapoint(t *testing.T) {
-	data, err := ioutil.ReadFile(testFile)
+	f, err := os.Open(testFile)
 	assert.Nil(t, err)
+	defer f.Close()
+
+	reader := bufio.NewReader(f)
+	data, erl := reader.ReadBytes('\n')
+	assert.Nil(t, erl)
 
 	q, _ := NewQuery(data)
 	mp, _ := NewMPQuery(q)
