@@ -15,6 +15,8 @@ import (
 
 // Loader is for loading cached files, generate fake points and insert to store
 
+const MaxDataBatch = 2500
+
 type Loader struct {
 	config *config.Config
 	client client.Client
@@ -45,7 +47,7 @@ func NewLoader(config *config.Config, logger *log.Logger) (*Loader, error) {
 	return l, nil
 }
 
-func (l *Loader) InsertData(file, db string) error {
+func (l *Loader) InsertData(file, db string, mutations int) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return err
@@ -59,6 +61,7 @@ func (l *Loader) InsertData(file, db string) error {
 		Precision: "s",
 	})
 
+	count := 0
 	for {
 		line, erl := reader.ReadBytes('\n')
 		if erl == io.EOF {
@@ -68,20 +71,63 @@ func (l *Loader) InsertData(file, db string) error {
 			continue
 		}
 
-		pt, erp := parse(line)
-		bp.AddPoint(pt)
-
+		mp, erp := parse(line)
 		if erp != nil {
 			//debugging
-			println(erp.Error())
+			println("[debug]", erp.Error())
 			continue
 		}
+
+		pt, erc := generatePoint(mp)
+		if erp != nil {
+			//debugging
+			println("[debug]", erc.Error())
+			continue
+		}
+
+		bp.AddPoint(pt)
+		count++
+
+		for _, mmp := range mp.MutateN(mutations) {
+			if count >= MaxDataBatch {
+				err := l.client.Write(bp)
+
+				// reset
+				count = 0
+				bp, _ = client.NewBatchPoints(client.BatchPointsConfig{
+					Database:  db,
+					Precision: "s",
+				})
+
+				if err != nil {
+					return err
+				}
+			}
+
+			mpt, erc := generatePoint(mmp)
+			if erp != nil {
+				//debugging
+				println("[debug]", erc.Error())
+				continue
+			}
+
+			bp.AddPoint(mpt)
+			count++
+		}
+
 	}
 
-	// Write the batch
-	err = l.client.Write(bp)
+	// Flush the batch
+	return l.Flush(bp, count)
+}
 
-	return err
+func (l *Loader) Flush(bp client.BatchPoints, count int) error {
+	if count > 0 {
+		// Write the batch
+		return l.client.Write(bp)
+	}
+
+	return nil
 }
 
 func (l *Loader) ExecuteQuery(cmd, db, precision string) (*client.Response, error) {
@@ -89,7 +135,7 @@ func (l *Loader) ExecuteQuery(cmd, db, precision string) (*client.Response, erro
 	return l.client.Query(q)
 }
 
-func parse(line []byte) (*client.Point, error) {
+func parse(line []byte) (*data.MPQuery, error) {
 	if len(line) == 0 {
 		return nil, fmt.Errorf("[Loader]Empty line to parse")
 	}
@@ -99,7 +145,11 @@ func parse(line []byte) (*client.Point, error) {
 		return nil, err
 	}
 
-	mp, _ := data.NewMPQuery(q)
+	mp, err := data.NewMPQuery(q)
+	return mp, err
+}
+
+func generatePoint(mp *data.MPQuery) (*client.Point, error) {
 	tags := map[string]string{
 		"Event":            mp.Event,
 		"ProjectID":        mp.ProjectID,

@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -91,4 +92,53 @@ func GetSignature(q *Query) string {
 	hasher.Write([]byte(text))
 
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+// Generate N mutates
+func (mp *MPQuery) MutateN(n int) []*MPQuery {
+	arr := make([]*MPQuery, n)
+	for i := 0; i < n; i++ {
+		arr[i] = mp.MutateOne()
+	}
+
+	return arr
+}
+
+// Mutate generates a new query with same signature but different times and measurements
+func (mp *MPQuery) MutateOne() *MPQuery {
+	np := &MPQuery{
+		Event:            mp.Event,
+		ProjectID:        mp.ProjectID,
+		QueryID:          mp.QueryID,
+		QueryMs:          mp.QueryMs,
+		TotalWorkerCPUMs: mp.TotalWorkerCPUMs,
+		Result:           mp.Result,
+		Time:             mp.Time,
+		Source:           mp.Source,
+		Unit:             mp.Unit,
+		SSQMs:            mp.SSQMs,
+		SSQHostname:      mp.SSQHostname,
+		FromDate:         mp.FromDate,
+		ToDate:           mp.ToDate,
+		QueryPool:        mp.QueryPool,
+		Selector:         mp.Selector,
+		Queries:          mp.Queries,
+		Script:           mp.Script,
+		PropertiesMethod: mp.PropertiesMethod,
+		RetentionType:    mp.RetentionType,
+		Signature:        mp.Signature,
+	}
+
+	choice := rand.Intn(3)
+	switch choice {
+	case 0:
+		np.QueryMs = rand.Int63n(240 * 1e3)
+	case 1:
+		np.TotalWorkerCPUMs = rand.Int63n(240 * 1e3)
+	case 2:
+		np.SSQMs = rand.Int63n(240 * 1e3)
+	}
+
+	np.Time = time.Now().Unix() - rand.Int63n(10*60)
+	return np
 }

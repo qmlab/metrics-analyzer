@@ -27,7 +27,7 @@ func TestBasicLoadDB(t *testing.T) {
 	logger := log.New(os.Stdout, "DataLoader", log.LstdFlags)
 	l, _ := NewLoader(conf, logger)
 	CreateDB(t, l)
-	err := l.InsertData(testFile, "testdb")
+	err := l.InsertData(testFile, "testdb", 0)
 	assert.Nil(t, err)
 	QueryDB(t, l)
 	DropDB(t, l)
@@ -38,9 +38,19 @@ func TestGroupBySignature(t *testing.T) {
 	logger := log.New(os.Stdout, "DataLoader", log.LstdFlags)
 	l, _ := NewLoader(conf, logger)
 	CreateDB(t, l)
-	err := l.InsertData(testFile, "testdb")
+	err := l.InsertData(testFile, "testdb", 0)
 	assert.Nil(t, err)
 	QueryGroupBy(t, l)
+	DropDB(t, l)
+}
+
+func Test100kInserts(t *testing.T) {
+	conf := config.NewConfig(configDir, config.OneBox)
+	logger := log.New(os.Stdout, "DataLoader", log.LstdFlags)
+	l, _ := NewLoader(conf, logger)
+	CreateDB(t, l)
+	err := l.InsertData(testFile, "testdb", 1e6)
+	assert.Nil(t, err)
 	DropDB(t, l)
 }
 
