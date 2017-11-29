@@ -98,14 +98,14 @@ func GetSignature(q *Query) string {
 func (mp *MPQuery) MutateN(n int) []*MPQuery {
 	arr := make([]*MPQuery, n)
 	for i := 0; i < n; i++ {
-		arr[i] = mp.MutateOne()
+		arr[i] = mp.MutateOne(i, n)
 	}
 
 	return arr
 }
 
 // Mutate generates a new query with same signature but different times and measurements
-func (mp *MPQuery) MutateOne() *MPQuery {
+func (mp *MPQuery) MutateOne(i, n int) *MPQuery {
 	np := &MPQuery{
 		Event:            mp.Event,
 		ProjectID:        mp.ProjectID,
@@ -139,6 +139,6 @@ func (mp *MPQuery) MutateOne() *MPQuery {
 		np.SSQMs = rand.Int63n(240 * 1e3)
 	}
 
-	np.Time = time.Now().Unix() - rand.Int63n(10*60)
+	np.Time = time.Now().Unix() - int64(n-i)/10
 	return np
 }

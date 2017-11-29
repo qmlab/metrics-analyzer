@@ -10,41 +10,22 @@ import (
 
 	"../config"
 	"../data"
+	"../db"
 	client "github.com/influxdata/influxdb/client/v2"
 )
 
 // Loader is for loading cached files, generate fake points and insert to store
 
-const MaxDataBatch = 2500
+const MaxDataBatch = 5000
 
 type Loader struct {
-	config *config.Config
-	client client.Client
-	logger *log.Logger
+	db.DBClient
 }
 
 func NewLoader(config *config.Config, logger *log.Logger) (*Loader, error) {
-	if config == nil {
-		return nil, fmt.Errorf("[Loader]No config")
-	}
-
-	httpClient, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:     config.DB.Address,
-		Username: config.DB.Username,
-		Password: config.DB.Password,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	l := &Loader{
-		config: config,
-		client: httpClient,
-		logger: logger,
-	}
-
-	return l, nil
+	l := &Loader{}
+	err := l.DBClient.Init(config, logger)
+	return l, err
 }
 
 func (l *Loader) InsertData(file, db string, mutations int) error {
@@ -90,7 +71,7 @@ func (l *Loader) InsertData(file, db string, mutations int) error {
 
 		for _, mmp := range mp.MutateN(mutations) {
 			if count >= MaxDataBatch {
-				err := l.client.Write(bp)
+				err := l.Client.Write(bp)
 
 				// reset
 				count = 0
@@ -124,15 +105,10 @@ func (l *Loader) InsertData(file, db string, mutations int) error {
 func (l *Loader) Flush(bp client.BatchPoints, count int) error {
 	if count > 0 {
 		// Write the batch
-		return l.client.Write(bp)
+		return l.Client.Write(bp)
 	}
 
 	return nil
-}
-
-func (l *Loader) ExecuteQuery(cmd, db, precision string) (*client.Response, error) {
-	q := client.NewQuery(cmd, db, precision)
-	return l.client.Query(q)
 }
 
 func parse(line []byte) (*data.MPQuery, error) {

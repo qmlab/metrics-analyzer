@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"../config"
+	"../util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,50 +19,40 @@ func TestBasicDB(t *testing.T) {
 	logger := log.New(os.Stdout, "DataLoader", log.LstdFlags)
 	l, err := NewLoader(conf, logger)
 	assert.Nil(t, err)
-	CreateDB(t, l)
-	DropDB(t, l)
+	util.CreateDB(t, l.DBClient)
+	util.DropDB(t, l.DBClient)
 }
 
 func TestBasicLoadDB(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "DataLoader", log.LstdFlags)
 	l, _ := NewLoader(conf, logger)
-	CreateDB(t, l)
+	util.CreateDB(t, l.DBClient)
 	err := l.InsertData(testFile, "testdb", 0)
 	assert.Nil(t, err)
 	QueryDB(t, l)
-	DropDB(t, l)
+	util.DropDB(t, l.DBClient)
 }
 
 func TestGroupBySignature(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "DataLoader", log.LstdFlags)
 	l, _ := NewLoader(conf, logger)
-	CreateDB(t, l)
+	util.CreateDB(t, l.DBClient)
 	err := l.InsertData(testFile, "testdb", 0)
 	assert.Nil(t, err)
 	QueryGroupBy(t, l)
-	DropDB(t, l)
+	util.DropDB(t, l.DBClient)
 }
 
-func Test100kInserts(t *testing.T) {
+func TestInsertsN(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "DataLoader", log.LstdFlags)
 	l, _ := NewLoader(conf, logger)
-	CreateDB(t, l)
-	err := l.InsertData(testFile, "testdb", 1e6)
+	util.CreateDB(t, l.DBClient)
+	err := l.InsertData(testFile, "testdb", 1e4)
 	assert.Nil(t, err)
-	DropDB(t, l)
-}
-
-func CreateDB(t *testing.T, l *Loader) {
-	_, err := l.ExecuteQuery("CREATE DATABASE testdb", "", "")
-	assert.Nil(t, err)
-}
-
-func DropDB(t *testing.T, l *Loader) {
-	_, err := l.ExecuteQuery("DROP DATABASE testdb", "", "")
-	assert.Nil(t, err)
+	util.DropDB(t, l.DBClient)
 }
 
 func QueryDB(t *testing.T, l *Loader) {
@@ -88,4 +79,5 @@ func QueryGroupBy(t *testing.T, l *Loader) {
 	assert.Nil(t, err)
 	assert.Equal(t, json.Number("3792"), r.Results[0].Series[0].Values[0][1])
 	assert.Equal(t, json.Number("338"), r.Results[0].Series[1].Values[0][1])
+	assert.Equal(t, "e8c421b8560012ea9531bb3c20526628", r.Results[0].Series[1].Tags["Signature"])
 }
