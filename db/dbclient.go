@@ -40,6 +40,26 @@ func (c *DBClient) ExecuteQuery(cmd, db, precision string) (*client.Response, er
 	return c.Client.Query(q)
 }
 
+func (c *DBClient) CreateDB(db string) error {
+	_, err := c.ExecuteQuery(fmt.Sprintf("CREATE DATABASE %s", db), "", "")
+	return err
+}
+
+func (c *DBClient) DropDB(db string) error {
+	_, err := c.ExecuteQuery(fmt.Sprintf("DROP DATABASE %s", db), "", "")
+	return err
+}
+
+func (c *DBClient) CreateRetentionPolicy(db, name, duration string) error {
+	_, err := c.ExecuteQuery(fmt.Sprintf("CREATE RETENTION POLICY %s ON %s DURATION %s DEFAULT", name, db, duration), db, "")
+	return err
+}
+
+func (c *DBClient) DropRetentionPolicy(db, name string) error {
+	_, err := c.ExecuteQuery(fmt.Sprintf("DROP RETENTION POLICY %s ON %s", name, db), db, "")
+	return err
+}
+
 // GetMinutelyRate computes the per minute rate of a measurement per query signature
 func (c *DBClient) GetMinutelyRate(groupkey, query string, minutes int) (map[string]float64, error) {
 	r, err := c.ExecuteQuery(query, "testdb", "")

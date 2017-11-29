@@ -139,6 +139,6 @@ func (mp *MPQuery) MutateOne(i, n int) *MPQuery {
 		np.SSQMs = rand.Int63n(240 * 1e3)
 	}
 
-	np.Time = time.Now().Unix() - int64(n-i)/10
+	np.Time = time.Now().Unix() - int64(n-i)
 	return np
 }

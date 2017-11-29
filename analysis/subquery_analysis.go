@@ -6,29 +6,14 @@ package analysis
 
 import (
 	"fmt"
-	"log"
-
-	"../config"
-	"../db"
 )
 
-type SubQueryAnalyzer struct {
-	db.DBClient
-}
-
-func NewSubQueryAnalyzer(config *config.Config, logger *log.Logger) (*SubQueryAnalyzer, error) {
-	a := &SubQueryAnalyzer{}
-	err := a.DBClient.Init(config, logger)
-
-	return a, err
-}
-
-func (a *SubQueryAnalyzer) GetSSQElapsedByHost(days int, percentile int) (map[string]float64, error) {
+func (a *QueryAnalyzer) GetSSQElapsedByHost(days int, percentile int) (map[string]float64, error) {
 	q := fmt.Sprintf("select PERCENTILE(SSQMs, %d) from mp_query where time >= now()-%dd group by SSQHostname", percentile, days)
 	return a.GetTotal("SSQHostname", q)
 }
 
-func (a *SubQueryAnalyzer) GetSSQElapsedByPool(days int, percentile int) (map[string]float64, error) {
+func (a *QueryAnalyzer) GetSSQElapsedByPool(days int, percentile int) (map[string]float64, error) {
 	q := fmt.Sprintf("select PERCENTILE(SSQMs, %d) from mp_query where time >= now()-%dd group by QueryPool", percentile, days)
 	return a.GetTotal("QueryPool", q)
 }

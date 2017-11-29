@@ -8,11 +8,11 @@ import (
 )
 
 func CreateDB(t *testing.T, c db.DBClient) {
-	_, err := c.ExecuteQuery("CREATE DATABASE testdb", "", "")
+	err := c.CreateDB("testdb")
 	assert.Nil(t, err)
 }
 
 func DropDB(t *testing.T, c db.DBClient) {
-	_, err := c.ExecuteQuery("DROP DATABASE testdb", "", "")
+	err := c.DropDB("testdb")
 	assert.Nil(t, err)
 }
