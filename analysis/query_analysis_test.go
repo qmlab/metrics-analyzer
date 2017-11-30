@@ -11,10 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetElapsedRate(t *testing.T) {
+func TestGetElapsed(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 0)
@@ -26,13 +26,19 @@ func TestGetElapsedRate(t *testing.T) {
 		assert.True(t, v > 0)
 	}
 
+	m, err = a.GetElapsedAvg(10)
+	assert.Nil(t, err)
+	for _, v := range m {
+		assert.True(t, v > 0)
+	}
+
 	util.DropDB(t, a.DBClient)
 }
 
-func TestGetTotalWorkerCPURate(t *testing.T) {
+func TestGetTotalWorkerCPU(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 0)
@@ -44,13 +50,19 @@ func TestGetTotalWorkerCPURate(t *testing.T) {
 		assert.True(t, v > 0)
 	}
 
+	m, err = a.GetTotalWorkerCPUAvg(10)
+	assert.Nil(t, err)
+	for _, v := range m {
+		assert.True(t, v > 0)
+	}
+
 	util.DropDB(t, a.DBClient)
 }
 
 func TestGetSuccessRate(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 0)
@@ -68,7 +80,7 @@ func TestGetSuccessRate(t *testing.T) {
 func TestGetElapsedRateN(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 1e4)
@@ -88,7 +100,7 @@ func TestGetElapsedRateN(t *testing.T) {
 func TestGetTotalWorkerCPURateN(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 1e4)
@@ -108,7 +120,7 @@ func TestGetTotalWorkerCPURateN(t *testing.T) {
 func TestGetSuccessRateN(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 1e4)

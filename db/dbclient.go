@@ -61,8 +61,8 @@ func (c *DBClient) DropRetentionPolicy(db, name string) error {
 }
 
 // GetMinutelyRate computes the per minute rate of a measurement per query signature
-func (c *DBClient) GetMinutelyRate(groupkey, query string, minutes int) (map[string]float64, error) {
-	r, err := c.ExecuteQuery(query, "testdb", "")
+func (c *DBClient) GetMinutelyRate(db, groupkey, query string, minutes int) (map[string]float64, error) {
+	r, err := c.ExecuteQuery(query, db, "")
 	if err != nil {
 		return nil, err
 	}
@@ -86,8 +86,8 @@ func (c *DBClient) GetMinutelyRate(groupkey, query string, minutes int) (map[str
 }
 
 // GetTotal computes the total of a measurement per query signature
-func (c *DBClient) GetTotal(groupkey, query string) (map[string]float64, error) {
-	r, err := c.ExecuteQuery(query, "testdb", "")
+func (c *DBClient) GetTotal(db, groupkey, query string) (map[string]float64, error) {
+	r, err := c.ExecuteQuery(query, db, "")
 	if err != nil {
 		return nil, err
 	}

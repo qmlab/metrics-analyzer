@@ -10,10 +10,10 @@ import (
 
 func (a *QueryAnalyzer) GetSSQElapsedByHost(days int, percentile int) (map[string]float64, error) {
 	q := fmt.Sprintf("select PERCENTILE(SSQMs, %d) from mp_query where time >= now()-%dd group by SSQHostname", percentile, days)
-	return a.GetTotal("SSQHostname", q)
+	return a.GetTotal(a.db, "SSQHostname", q)
 }
 
 func (a *QueryAnalyzer) GetSSQElapsedByPool(days int, percentile int) (map[string]float64, error) {
 	q := fmt.Sprintf("select PERCENTILE(SSQMs, %d) from mp_query where time >= now()-%dd group by QueryPool", percentile, days)
-	return a.GetTotal("QueryPool", q)
+	return a.GetTotal(a.db, "QueryPool", q)
 }

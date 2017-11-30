@@ -14,7 +14,7 @@ import (
 func TestGetSSQElapsedByHostOne(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 0)
@@ -32,7 +32,7 @@ func TestGetSSQElapsedByHostOne(t *testing.T) {
 func TestGetSSQElapsedByPoolOne(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 0)
@@ -50,7 +50,7 @@ func TestGetSSQElapsedByPoolOne(t *testing.T) {
 func TestGetSSQElapsedByHostN(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 1e4)
@@ -70,7 +70,7 @@ func TestGetSSQElapsedByHostN(t *testing.T) {
 func TestGetSSQElapsedByPoolN(t *testing.T) {
 	conf := config.NewConfig(configDir, config.OneBox)
 	logger := log.New(os.Stdout, "QueryAnalyzer", log.LstdFlags)
-	a, _ := NewQueryAnalyzer(conf, logger)
+	a, _ := NewQueryAnalyzer(util.TestDB, conf, logger)
 	l, _ := ingress.NewLoader(conf, logger)
 	util.CreateDB(t, a.DBClient)
 	err := l.InsertData(testFile, "testdb", 1e4)

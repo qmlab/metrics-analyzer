@@ -14,11 +14,11 @@ import (
 )
 
 type Options struct {
-	Database        string `short:"n" long:"database" description:"Database name" default:"testdb"`
+	Database        string `short:"n" long:"database" description:"Database name" default:"sandbox"`
 	CreateDB        bool   `short:"c" long:"create" description:"Create database"`
 	DropDB          bool   `short:"d" long:"drop" description:"Drop database"`
 	InputFile       string `short:"f" long:"file" description:"Input file containing the MP queries" default:""`
-	Query           string `short:"q" long:"query" description:"Query to execute:{elapsed|cpu|success_rate|ssq_elapsed_host|ssq_elapsed_pool}" default:""`
+	Query           string `short:"q" long:"query" description:"Query to execute:{elapsed|elapsed_rate|cpu|cpu_rate|success_rate|ssq_elapsed_host|ssq_elapsed_pool}" default:""`
 	Days            int    `short:"t" long:"days" description:"Days to compute the rates" default:"1"`
 	Env             string `short:"e" long:"env" description:"Environment:{onebox|dev|prod}" default:"onebox"`
 	Mutations       int    `short:"m" long:"mutations" description:"Create M different mutations with the same query signature" default:"0"`
@@ -67,13 +67,17 @@ func main() {
 	}
 
 	if len(o.Query) > 0 {
-		qa, _ := analysis.NewQueryAnalyzer(conf, logger)
+		qa, _ := analysis.NewQueryAnalyzer(o.Database, conf, logger)
 		var m map[string]float64
 
 		switch o.Query {
 		case "elapsed":
-			m, err = qa.GetElapsedRate(o.Days)
+			m, err = qa.GetElapsedAvg(o.Days)
 		case "cpu":
+			m, err = qa.GetTotalWorkerCPUAvg(o.Days)
+		case "elapsed_rate":
+			m, err = qa.GetElapsedRate(o.Days)
+		case "cpu_rate":
 			m, err = qa.GetTotalWorkerCPURate(o.Days)
 		case "success_rate":
 			m, err = qa.GetSuccessRate(o.Days)

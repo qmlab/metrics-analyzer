@@ -38,14 +38,8 @@ func NewMPQuery(q *Query) (*MPQuery, error) {
 		return nil, fmt.Errorf("Empty query")
 	}
 
-	fromDate, err := time.Parse("2006-01-02T15:04:05", q.Properties.RequestParams.FromDate)
-	if err != nil {
-		return nil, err
-	}
-	toDate, err := time.Parse("2006-01-02T15:04:05", q.Properties.RequestParams.ToDate)
-	if err != nil {
-		return nil, err
-	}
+	fromDate, _ := time.Parse("2006-01-02T15:04:05", q.Properties.RequestParams.FromDate)
+	toDate, _ := time.Parse("2006-01-02T15:04:05", q.Properties.RequestParams.ToDate)
 
 	mq := &MPQuery{
 		Event:            q.Event,
