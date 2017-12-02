@@ -16,7 +16,7 @@ import (
 
 // Loader is for loading cached files, generate fake points and insert to store
 
-const MaxDataBatch = 5000
+const MaxDataBatch = 1000
 
 type Loader struct {
 	db.DBClient
@@ -96,10 +96,25 @@ func (l *Loader) InsertData(file, db string, mutations int) error {
 			count++
 		}
 
+		if count >= MaxDataBatch {
+			err := l.Client.Write(bp)
+
+			// reset
+			count = 0
+			bp, _ = client.NewBatchPoints(client.BatchPointsConfig{
+				Database:  db,
+				Precision: "s",
+			})
+
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	// Flush the batch
-	return l.Flush(bp, count)
+	r := l.Flush(bp, count)
+	return r
 }
 
 func (l *Loader) Flush(bp client.BatchPoints, count int) error {
@@ -127,16 +142,16 @@ func parse(line []byte) (*data.MPQuery, error) {
 
 func generatePoint(mp *data.MPQuery) (*client.Point, error) {
 	tags := map[string]string{
-		"Event":            mp.Event,
-		"ProjectID":        mp.ProjectID,
-		"QueryID":          mp.QueryID,
-		"Source":           mp.Source,
-		"Unit":             mp.Unit,
-		"SSQHostname":      mp.SSQHostname,
-		"QueryPool":        mp.QueryPool,
-		"Selector":         mp.Selector,
-		"Queries":          mp.Queries,
-		"Script":           mp.Script,
+		"Event":       mp.Event,
+		"ProjectID":   mp.ProjectID,
+		"QueryID":     mp.QueryID,
+		"Source":      mp.Source,
+		"Unit":        mp.Unit,
+		"SSQHostname": mp.SSQHostname,
+		"QueryPool":   mp.QueryPool,
+		"Selector":    mp.Selector,
+		// "Queries":          mp.Queries,	// problematic > 3xx bytes
+		// "Script":           mp.Script,
 		"PropertiesMethod": mp.PropertiesMethod,
 		"RetentionType":    mp.RetentionType,
 		"Signature":        mp.Signature,
