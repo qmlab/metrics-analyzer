@@ -10,9 +10,9 @@ import (
 )
 
 type MPQuery struct {
-	Event            string `json:"event"`
-	ProjectID        string `json:"distinct_id"`
-	QueryID          string `json:"query_id"`
+	Event     string `json:"event"`
+	ProjectID string `json:"distinct_id"`
+	// QueryID          string `json:"query_id"`
 	QueryMs          int64  `json:"dqs_elapsed_ms"`
 	TotalWorkerCPUMs int64  `json:"lqs_total_cpu_ms"`
 	Result           bool   `json:"success"`
@@ -23,9 +23,9 @@ type MPQuery struct {
 	FromDate         int64  `json:"from_date"`
 	ToDate           int64  `json:"to_date"`
 	QueryPool        string `json:"query_pool"`
-	Selector         string `json:"selector"`                // list
-	Queries          string `json:"queries"`                 // normal, funnel, history, retention, addiction
-	Script           string `json:"script"`                  // jql
+	Selector         string `json:"selector"` // list
+	// Queries          string `json:"queries"`                 // normal, funnel, history, retention, addiction
+	// Script           string `json:"script"`                  // jql
 	PropertiesMethod string `json:"properties_query_method"` // properties
 	RetentionType    string `json:"retention_type"`          // retention
 	Signature        string `json:"signature"`               // signature of MP query tags
@@ -42,9 +42,9 @@ func NewMPQuery(q *Query) (*MPQuery, error) {
 	toDate, _ := time.Parse("2006-01-02T15:04:05", q.Properties.RequestParams.ToDate)
 
 	mq := &MPQuery{
-		Event:            q.Event,
-		ProjectID:        q.Properties.ProjectID,
-		QueryID:          q.Properties.QueryID,
+		Event:     q.Event,
+		ProjectID: q.Properties.ProjectID,
+		// QueryID:          q.Properties.QueryID,
 		QueryMs:          q.Properties.ElapsedMs,
 		TotalWorkerCPUMs: q.Properties.TotalWorkerCPUMs,
 		Result:           q.Properties.Result,
@@ -57,8 +57,8 @@ func NewMPQuery(q *Query) (*MPQuery, error) {
 		ToDate:           toDate.Unix(),
 		QueryPool:        q.Properties.RequestParams.QueryPool,
 		Selector:         q.Properties.RequestParams.Selector,
-		Queries:          q.Properties.RequestParams.Queries,
-		Script:           q.Properties.RequestParams.Script,
+		// Queries:          q.Properties.RequestParams.Queries,
+		// Script:           q.Properties.RequestParams.Script,
 		PropertiesMethod: q.Properties.RequestParams.PropertiesMethod,
 		RetentionType:    q.Properties.RequestParams.RetentionType,
 		Signature:        GetSignature(q),
@@ -76,8 +76,8 @@ func GetSignature(q *Query) string {
 		q.Properties.RequestParams.ToDate,
 		q.Properties.RequestParams.QueryPool,
 		q.Properties.RequestParams.Selector,
-		q.Properties.RequestParams.Queries,
-		q.Properties.RequestParams.Script,
+		// q.Properties.RequestParams.Queries,
+		// q.Properties.RequestParams.Script,
 		q.Properties.RequestParams.PropertiesMethod,
 		q.Properties.RequestParams.RetentionType,
 	}, "|")
@@ -101,9 +101,9 @@ func (mp *MPQuery) MutateN(n int) []*MPQuery {
 // Mutate generates a new query with same signature but different times and measurements
 func (mp *MPQuery) MutateOne(i, n int) *MPQuery {
 	np := &MPQuery{
-		Event:            mp.Event,
-		ProjectID:        mp.ProjectID,
-		QueryID:          mp.QueryID,
+		Event:     mp.Event,
+		ProjectID: mp.ProjectID,
+		// QueryID:          mp.QueryID,
 		QueryMs:          mp.QueryMs,
 		TotalWorkerCPUMs: mp.TotalWorkerCPUMs,
 		Result:           mp.Result,
@@ -116,8 +116,8 @@ func (mp *MPQuery) MutateOne(i, n int) *MPQuery {
 		ToDate:           mp.ToDate,
 		QueryPool:        mp.QueryPool,
 		Selector:         mp.Selector,
-		Queries:          mp.Queries,
-		Script:           mp.Script,
+		// Queries:          mp.Queries,
+		// Script:           mp.Script,
 		PropertiesMethod: mp.PropertiesMethod,
 		RetentionType:    mp.RetentionType,
 		Signature:        mp.Signature,

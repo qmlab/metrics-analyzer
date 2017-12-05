@@ -142,9 +142,9 @@ func parse(line []byte) (*data.MPQuery, error) {
 
 func generatePoint(mp *data.MPQuery) (*client.Point, error) {
 	tags := map[string]string{
-		"Event":       mp.Event,
-		"ProjectID":   mp.ProjectID,
-		"QueryID":     mp.QueryID,
+		"Event":     mp.Event,
+		"ProjectID": mp.ProjectID,
+		// "QueryID":     mp.QueryID,
 		"Source":      mp.Source,
 		"Unit":        mp.Unit,
 		"SSQHostname": mp.SSQHostname,
