@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"../config"
@@ -145,25 +146,33 @@ func generatePoint(mp *data.MPQuery) (*client.Point, error) {
 		"Event":     mp.Event,
 		"ProjectID": mp.ProjectID,
 		// "QueryID":     mp.QueryID,
-		"Source":      mp.Source,
-		"Unit":        mp.Unit,
-		"SSQHostname": mp.SSQHostname,
-		"QueryPool":   mp.QueryPool,
-		"Selector":    mp.Selector,
+		"Source": mp.Source,
+		"Unit":   mp.Unit,
+		// "SSQHostname": mp.SSQHostname,
+		"QueryPool":      mp.QueryPool,
+		"FromDate":       strconv.Itoa(int(mp.FromDate)),
+		"Duration":       strconv.Itoa(int(mp.Duration)),
+		"Product":        mp.Product,
+		"UsePeople":      strconv.FormatBool(mp.UsePeople),
+		"MaxStaleness":   strconv.Itoa(int(mp.MaxStaleness)),
+		"SkipMutable":    strconv.FormatBool(mp.SkipMutable),
+		"SkipQueryCache": strconv.FormatBool(mp.SkipQueryCache),
+		"SkipDataCache":  strconv.FormatBool(mp.SkipDataCache),
+		// "Selector":    mp.Selector,
 		// "Queries":          mp.Queries,	// problematic > 3xx bytes
 		// "Script":           mp.Script,
-		"PropertiesMethod": mp.PropertiesMethod,
-		"RetentionType":    mp.RetentionType,
-		"Signature":        mp.Signature,
+		// "PropertiesMethod": mp.PropertiesMethod,
+		// "RetentionType":    mp.RetentionType,
+		// "Signature":        mp.Signature,
 	}
 
 	fields := map[string]interface{}{
-		"QueryMs":          mp.QueryMs,
+		// "QueryMs":          mp.QueryMs,
 		"TotalWorkerCPUMs": mp.TotalWorkerCPUMs,
 		"Result":           mp.Result,
-		"SSQMs":            mp.SSQMs,
-		"FromDate":         mp.FromDate,
-		"ToDate":           mp.ToDate,
+		// "SSQMs":            mp.SSQMs,
+		"FromDate": mp.FromDate,
+		"ToDate":   mp.ToDate,
 	}
 
 	pt, err := client.NewPoint("mp_query", tags, fields, time.Unix(mp.Time, 0))
